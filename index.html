@@ -1,0 +1,970 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>StudyForge — College Test Builder</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" content="#496b59" />
+  <script defer src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- Document text extraction: runs in the browser; files are not uploaded to StudyForge. -->
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <!-- Phase 4 output tools: all rendering/export work happens in the browser. -->
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/docx@9.8.1/dist/index.umd.min.js"></script>
+</head>
+
+<body>
+  <a class="skip-link" href="#mainContent">Skip to main content</a>
+  <div class="app" id="appShell">
+    <header class="site-header">
+      <div class="brand">
+        <div class="logo">S</div>
+        <div>
+          <div class="brand-name">Study<span>Forge</span></div>
+          <div class="brand-sub">University Study Workspace</div>
+        </div>
+      </div>
+      <nav class="nav" aria-label="Main navigation">
+        <button data-view="dashboard" class="active">Dashboard</button>
+        <button data-view="notes">Library</button>
+        <button data-view="tests">Tests</button>
+        <button data-view="history">History</button>
+        <button data-view="mistakes">Mistakes</button>
+        <button data-view="studyPlan">Study Plan</button>
+        <button data-view="subjects">Subjects</button>
+        <button data-view="settings">Settings</button>
+      </nav>
+      <div class="header-actions">
+        <button class="header-btn header-chat" id="openChatGPTGlobal" type="button" title="Open ChatGPT">Open
+          ChatGPT</button>
+        <button class="icon-btn" id="themeToggle" type="button" title="Change theme"
+          aria-label="Change theme">☾</button>
+      </div>
+    </header>
+
+    <div class="layout">
+      <main class="main" id="mainContent" tabindex="-1">
+        <section id="dashboard" class="view active">
+          <div class="topline">
+            <div>
+              <div class="eyebrow">Study workspace</div>
+              <h1 class="title">Your study space, kept simple.</h1>
+              <p class="subtitle">Keep your notes, tests, progress, and review in one calm workspace.</p>
+            </div>
+            <div class="actions"><button class="secondary" id="openResearch">⌕ Research Topic</button><button
+                class="secondary" id="openCreateNoteDash">+ Create a Note</button><button class="secondary"
+                id="openAddNote">+ Add Notes</button><button class="primary" id="openAddTest">+ Add Test</button></div>
+          </div>
+          <div class="dashboard-hero card">
+            <div>
+              <div class="eyebrow">Your workspace</div>
+              <h2>Study without the clutter.</h2>
+              <p>Research when you need it, organize your notes, build tests, and review what you missed.</p>
+              <div class="hero-flow"><span>Research</span><i>→</i><span>Notes</span><i>→</i><span>GPT
+                  Exam</span><i>→</i><span>Import</span><i>→</i><span>Practice</span></div>
+            </div>
+            <div class="dashboard-hero-actions"><button class="primary" id="heroCreateNote">Create a
+                Note</button><button class="primary" id="heroAddTest">Create an Exam</button><button class="secondary"
+                id="heroResearch">Research a Topic</button><button class="secondary" id="heroChatGPT">Open
+                ChatGPT</button></div>
+          </div>
+          <div class="card study-steps-card" id="workflowGuide">
+            <div class="study-steps-heading">
+              <div>
+                <div class="eyebrow">Quick guide</div>
+                <h2 class="section-title">Three steps to study</h2>
+                <p class="small">Research, organize, then practice. You can use only the parts you need.</p>
+              </div>
+            </div>
+            <div class="study-workflows">
+              <div class="study-workflow">
+                <div class="workflow-title"><span class="workflow-icon">1</span>
+                  <div><b>Notes</b><small>Keep your study material</small></div>
+                </div>
+                <ol>
+                  <li>Click <strong>Add Notes</strong>.</li>
+                  <li>Enter the subject, topic, and your notes.</li>
+                  <li>Save the notes so they are available for studying and test creation.</li>
+                </ol>
+              </div>
+              <div class="study-workflow">
+                <div class="workflow-title"><span class="workflow-icon">2</span>
+                  <div><b>Research</b><small>Turn a topic into useful notes</small></div>
+                </div>
+                <ol>
+                  <li>Choose the topic, subject, academic level, depth, review mode, and material.</li>
+                  <li>Click <strong>Build GPT Research Prompt</strong>, then use <strong>Copy & Open ChatGPT</strong>.
+                  </li>
+                  <li>Copy GPT's response, paste it on the same page, and click <strong>Save to My Notes</strong>.</li>
+                </ol>
+              </div>
+              <div class="study-workflow">
+                <div class="workflow-title"><span class="workflow-icon">3</span>
+                  <div><b>Tests</b><small>Build, take, and review</small></div>
+                </div>
+                <ol>
+                  <li>Enter the subject, study notes, assessment level, test type, test mode, and time limit.</li>
+                  <li>Set the number of questions, click <strong>Generate Exam Prompt</strong>, then use <strong>Copy &
+                      Open ChatGPT</strong>.</li>
+                  <li>Paste GPT's JSON into the same builder, click <strong>Import GPT JSON</strong>, review the
+                    questions, and save.</li>
+                </ol>
+              </div>
+            </div>
+            <div class="study-tip"><b>Recommended workflow:</b> <strong>Research Topic → My Notes → My Tests → Take Test
+                → Review Mistakes.</strong> For Korean, Japanese, Malay, and other content-heavy subjects, use Research
+              Topic to organize wording, definitions, concepts, and discussions before generating questions.</div>
+          </div>
+          <div class="dashboard-tools-grid">
+            <button class="dashboard-tool-card" id="dashboardCreateNote" type="button"><span
+                class="tool-icon">✦</span><span><b>Create a Note</b><small>Turn a topic or draft into a detailed
+                  reviewer prompt for ChatGPT.</small></span><strong>→</strong></button>
+            <button class="dashboard-tool-card" id="dashboardAddNotes" type="button"><span
+                class="tool-icon">＋</span><span><b>Add your own notes</b><small>Paste notes or upload PDF / Word files
+                  for your study library.</small></span><strong>→</strong></button>
+            <button class="dashboard-tool-card" id="dashboardBuildTest" type="button"><span
+                class="tool-icon">✓</span><span><b>Build a test</b><small>Use your saved notes to create a validated
+                  assessment.</small></span><strong>→</strong></button>
+            <button class="dashboard-tool-card" id="dashboardReviewMistakes" type="button"><span
+                class="tool-icon">↺</span><span><b>Review mistakes</b><small>Practice the concepts you missed instead of
+                  starting over.</small></span><strong>→</strong></button>
+          </div>
+          <div class="card dashboard-overview" id="dashboardOverview"></div>
+          <div class="dashboard-focus-grid" id="dashboardFocusGrid" aria-live="polite"></div>
+          <div class="dashboard-stat-header">
+            <div>
+              <div class="eyebrow">Progress</div>
+              <h2 class="section-title">Your statistics</h2>
+            </div><button class="secondary danger" id="resetStatsBtn" type="button">Reset Statistics</button>
+          </div>
+          <div id="statsOverview" class="cards dashboard-stats-overview"></div>
+          <div id="statsDetail" class="dashboard-stats-detail"></div>
+          <div class="card" id="weakTopics"></div>
+          <div class="cards" id="statsCards"></div>
+          <div class="card quick-review-card" id="dashboardQuickReview"></div>
+          <div class="grid2">
+            <div class="card">
+              <h2 class="section-title">Recent performance</h2>
+              <div id="chart"></div>
+            </div>
+            <div class="card">
+              <h2 class="section-title">Continue studying</h2>
+              <div id="continueList" class="list"></div>
+            </div>
+          </div>
+          <div class="card" style="margin-top:16px">
+            <h2 class="section-title">Your tests</h2>
+            <div id="dashboardTests" class="list"></div>
+          </div>
+        </section>
+
+        <section id="notes" class="view">
+          <div class="topline">
+            <div>
+              <div class="eyebrow">Study library</div>
+              <h1 class="title">Library</h1>
+              <p class="subtitle">Research a topic, save the notes, and study from the same place.</p>
+            </div>
+            <div class="actions"><button class="secondary" id="openCreateNote">+ Create a Note</button><button
+                class="primary" id="openAddNote2">+ Add Notes</button></div>
+          </div>
+          <details class="library-research card" open>
+            <summary><span><b>Research a topic</b><small>Build a GPT research prompt and bring the finished notes back
+                  here.</small></span><strong>Open</strong></summary>
+            <div class="library-research-body">
+              <div class="topline compact-topline">
+                <div>
+                  <div class="eyebrow">Research</div>
+                  <h2 class="section-title">Research a Topic</h2>
+                  <p class="small">Create a clear prompt, open ChatGPT, then save the useful result to your library.</p>
+                </div><button class="secondary" id="researchOpenChatGPT">Open ChatGPT</button>
+              </div>
+              <div class="card research-card-inner">
+                <form id="researchForm" class="form">
+                  <div class="form-grid">
+                    <div class="field"><label for="researchTopic">Topic</label><input id="researchTopic" required
+                        placeholder="e.g. Darcy's Law and groundwater flow" /></div>
+                    <div class="field"><label for="researchSubject">Course / Subject</label><input id="researchSubject"
+                        placeholder="e.g. Hydrology" /></div>
+                  </div>
+                  <div class="form-grid">
+                    <div class="field"><label for="researchLevel">Academic level</label><select id="researchLevel">
+                        <option>College / Professional</option>
+                        <option>Senior High School</option>
+                        <option>High School</option>
+                        <option>General Review</option>
+                      </select></div>
+                    <div class="field"><label for="researchDepth">Research depth</label><select id="researchDepth">
+                        <option value="deep">Detailed</option>
+                        <option value="standard">Standard</option>
+                        <option value="quick">Quick</option>
+                      </select></div>
+                  </div>
+                  <div class="form-grid">
+                    <div class="field"><label for="researchMode">Review mode</label><select id="researchMode">
+                        <option value="content">Content / Word-Based Review</option>
+                        <option value="language">Language Review</option>
+                        <option value="technical">Technical / Calculation Review</option>
+                      </select></div>
+                    <div class="field" id="researchLanguageField" hidden><label
+                        for="researchLanguage">Language</label><select id="researchLanguage">
+                        <option value="korean">Korean (한국어)</option>
+                        <option value="japanese">Japanese (日本語)</option>
+                        <option value="malay">Malay (Bahasa Melayu)</option>
+                        <option value="other">Other / User Specified</option>
+                      </select></div>
+                  </div>
+                  <div class="field"><label for="researchStyle">Material to create</label><select id="researchStyle">
+                      <option value="notes-test">Structured Notes + Practice Test</option>
+                      <option value="notes">Structured Notes Only</option>
+                      <option value="test">Practice Test Only</option>
+                      <option value="teach">Teach Me</option>
+                      <option value="reviewer">Exam Reviewer</option>
+                    </select></div>
+                  <div class="actions"><button class="primary" type="submit" id="researchBtn">Build GPT Research
+                      Prompt</button><button class="secondary" type="button" id="clearResearch">Clear</button></div>
+                </form>
+              </div>
+              <div id="researchStatus" class="research-status" hidden></div>
+              <div id="researchResults"></div>
+            </div>
+          </details>
+          <div class="toolbar card"><input id="noteSearch" placeholder="Search notes, subjects, or topics…" /><select
+              id="noteSubjectFilter">
+              <option value="">All subjects</option>
+            </select><button class="secondary" id="clearNoteFilters">Clear</button></div>
+          <div id="noteGrid" class="note-grid"></div>
+        </section>
+
+        <section id="tests" class="view">
+          <div class="topline">
+            <div>
+              <div class="eyebrow">Your tests</div>
+              <h1 class="title">My Tests</h1>
+              <p class="subtitle">Create tests with GPT, review the questions, then take your finished exam.</p>
+            </div><button class="primary" id="openAddTest2">+ Add Test</button>
+          </div>
+          <div class="card test-workflow-banner">
+            <div><b>How test creation works</b><span>GPT Exam Prompt → Open ChatGPT → Import GPT JSON → Review →
+                Save</span></div>
+            <div class="actions"><button class="secondary" id="importSharedTestBtn" type="button">Import Shared
+                Test</button><input id="importSharedTestFile" type="file" accept="application/json,.json"
+                hidden /><button class="secondary" id="testsOpenChatGPT">Open ChatGPT</button></div>
+          </div>
+          <div class="toolbar card"><input id="testSearch" placeholder="Search tests or subjects…" /><select
+              id="testSort">
+              <option value="updated">Recently updated</option>
+              <option value="title">Title</option>
+              <option value="questions">Question count</option>
+            </select></div>
+          <div id="testIntelligencePanel" class="phase2-grid"></div>
+          <div id="testGrid" class="note-grid"></div>
+        </section>
+
+        <section id="history" class="view">
+          <div class="topline">
+            <div>
+              <div class="eyebrow">Performance</div>
+              <h1 class="title">Test History</h1>
+              <p class="subtitle">Every completed attempt is saved on this device.</p>
+            </div>
+            <div class="actions"><button class="secondary" id="exportDataBtn">Export Backup</button><button
+                class="secondary" id="importDataBtn">Import Backup</button><input id="importDataFile" type="file"
+                accept="application/json" hidden /></div>
+          </div>
+          <div class="card history-summary" id="historySummary"></div>
+          <div class="card">
+            <div id="historyList" class="list"></div>
+          </div>
+        </section>
+
+
+        <section id="studyPlan" class="view">
+          <div class="topline">
+            <div>
+              <div class="eyebrow">Plan your study</div>
+              <h1 class="title">Study Plan</h1>
+              <p class="subtitle">Turn your subjects and syllabus topics into an organized study path.</p>
+            </div>
+            <div class="actions"><button class="secondary" id="importSyllabusBtn" type="button">Import
+                Syllabus</button><input id="syllabusFileInput" type="file"
+                accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                hidden /><button class="primary" id="newStudyPlanBtn" type="button">+ New Plan</button></div>
+          </div>
+          <div class="phase3-plan-grid">
+            <div class="card">
+              <div class="eyebrow">Create a plan</div>
+              <h2 class="section-title">Study schedule</h2>
+              <form id="studyPlanForm" class="form">
+                <div class="form-grid">
+                  <div class="field"><label for="planSubject">Subject</label><input id="planSubject" required
+                      placeholder="e.g. Hydraulics" /></div>
+                  <div class="field"><label for="planExamDate">Target date <span
+                        class="small">optional</span></label><input id="planExamDate" type="date" /></div>
+                </div>
+                <div class="form-grid">
+                  <div class="field"><label for="planMinutes">Study minutes / day</label><input id="planMinutes"
+                      type="number" min="15" max="600" value="60" /></div>
+                  <div class="field"><label for="planTopics">Topics</label><input id="planTopics"
+                      placeholder="e.g. Buoyancy, Stability, Metacentric Height" /></div>
+                </div>
+                <div class="field"><label for="planTopicList">Topic list <span class="small">one topic per
+                      line</span></label><textarea id="planTopicList" class="compact-textarea" placeholder="Paste topics from your syllabus here...
+Hydrostatic forces
+Buoyancy
+Stability of floating bodies"></textarea></div>
+                <div id="syllabusImportStatus" class="field-help" aria-live="polite">You can import a PDF or Word
+                  syllabus and then review the detected topics before saving.</div>
+                <div class="actions"><button class="primary" type="submit">Save Study Plan</button><button
+                    class="secondary" type="button" id="clearStudyPlanForm">Clear</button></div>
+              </form>
+            </div>
+            <div class="card">
+              <div class="eyebrow">Your plans</div>
+              <h2 class="section-title">Study roadmap</h2>
+              <div id="studyPlanList" class="list"></div>
+            </div>
+          </div>
+        </section>
+
+        <section id="subjects" class="view">
+          <div class="topline">
+            <div>
+              <div class="eyebrow">Academic workspace</div>
+              <h1 class="title">Subjects</h1>
+              <p class="subtitle">See your notes, tests, progress, weak areas, and study plans by subject.</p>
+            </div><button class="secondary" id="subjectsRefreshBtn" type="button">Refresh</button>
+          </div>
+          <div id="subjectDashboardGrid" class="subject-dashboard-grid"></div>
+          <div class="card subject-detail-card" id="subjectDetailPanel">
+            <div class="empty">Select a subject to see its study dashboard.</div>
+          </div>
+        </section>
+
+        <section id="mistakes" class="view">
+          <div class="topline">
+            <div>
+              <div class="eyebrow">Review mistakes</div>
+              <h1 class="title">Mistake Bank</h1>
+              <p class="subtitle">Review weak concepts, track repeated mistakes, and practice what needs attention.</p>
+            </div>
+            <div class="actions"><button class="secondary" id="reviewDueBtn">Review Due</button><button
+                class="secondary" id="clearMistakesBtn">Clear Mistakes</button><button class="primary"
+                id="reviewMistakesBtn">Quick Review</button></div>
+          </div>
+          <div id="mistakeInsights" class="phase2-grid"></div>
+          <div id="mistakeList" class="list"></div>
+        </section>
+
+        <section id="settings" class="view">
+          <div class="topline">
+            <div>
+              <div class="eyebrow">StudyForge controls</div>
+              <h1 class="title">Settings</h1>
+              <p class="subtitle">Manage appearance, accessibility, saved data, and offline support.</p>
+            </div><button class="secondary" id="settingsRefreshBtn" type="button">Refresh</button>
+          </div>
+          <div class="settings-grid">
+            <div class="card settings-card">
+              <div class="eyebrow">Appearance</div>
+              <h2 class="section-title">Choose a simple look</h2>
+              <div class="settings-choice-block">
+                <div><b>Font style</b><small>Pick the text style that feels easiest to read.</small></div>
+                <div class="setting-choice-grid" id="fontStyleChoices" role="group" aria-label="Font style">
+                  <button type="button" class="setting-choice"
+                    data-font-choice="modern"><strong>Modern</strong><span>Clean sans</span></button>
+                  <button type="button" class="setting-choice"
+                    data-font-choice="academic"><strong>Academic</strong><span>Book-like</span></button>
+                  <button type="button" class="setting-choice"
+                    data-font-choice="clean"><strong>Clean</strong><span>Simple system</span></button>
+                </div>
+              </div>
+              <div class="settings-choice-block">
+                <div><b>Theme color</b><small>Choose the accent color used for buttons and highlights.</small></div>
+                <div class="setting-choice-grid" id="colorThemeChoices" role="group" aria-label="Theme color">
+                  <button type="button" class="setting-choice color-choice"
+                    data-color-choice="forest"><i></i><strong>Forest</strong><span>Calm green</span></button>
+                  <button type="button" class="setting-choice color-choice"
+                    data-color-choice="blue"><i></i><strong>Blue</strong><span>Cool blue</span></button>
+                  <button type="button" class="setting-choice color-choice"
+                    data-color-choice="warm"><i></i><strong>Warm</strong><span>Soft earth</span></button>
+                </div>
+              </div>
+              <div class="settings-row">
+                <div><b>Theme</b><small>Light, dark, or follow your device.</small></div><select id="settingsTheme"
+                  aria-label="Theme">
+                  <option value="system">System default</option>
+                  <option value="light">Light</option>
+                  <option value="dark">Dark</option>
+                </select>
+              </div>
+              <div class="settings-choice-block">
+                <div><b>Text size</b><small>Adjust the interface text from 80% to 140%.</small></div>
+                <div class="text-scale-control"><input id="settingsTextScale" type="range" min="80" max="140" step="5"
+                    value="100" aria-label="Text size percentage"><output id="settingsTextScaleValue"
+                    for="settingsTextScale">100%</output>
+                  <div class="text-scale-labels"><span>80%</span><span>100%</span><span>140%</span></div>
+                </div>
+              </div>
+              <div class="settings-row">
+                <div><b>Reduce motion</b><small>Minimize animation and transitions.</small></div><label
+                  class="switch"><input id="settingsReduceMotion" type="checkbox"><span
+                    aria-hidden="true"></span></label>
+              </div>
+              <div class="settings-row">
+                <div><b>High contrast</b><small>Increase visual separation between text, controls, and surfaces.</small>
+                </div><label class="switch"><input id="settingsHighContrast" type="checkbox"><span
+                    aria-hidden="true"></span></label>
+              </div>
+            </div>
+            <div class="card settings-card">
+              <div class="eyebrow">Data & backup</div>
+              <h2 class="section-title">Keep your study library safe</h2>
+              <p class="small">Your notes, tests, attempts, study plans, and review data are stored in this browser.
+                Export a backup before changing devices or clearing data.</p>
+              <div class="settings-action-grid"><button class="primary" id="settingsExportBackup" type="button">Export
+                  Backup</button><button class="secondary" id="settingsImportBackup" type="button">Import
+                  Backup</button><input id="settingsImportFile" type="file" accept="application/json,.json" hidden>
+              </div>
+              <div class="settings-action-grid"><button class="secondary" id="settingsClearHistory" type="button">Clear
+                  History & Mistakes</button><button class="secondary danger" id="settingsClearAll" type="button">Clear
+                  All Study Data</button></div>
+            </div>
+            <div class="card settings-card">
+              <div class="eyebrow">Storage</div>
+              <h2 class="section-title">Browser storage</h2>
+              <div id="settingsStorage" class="storage-panel" aria-live="polite"></div>
+            </div>
+            <div class="card settings-card">
+              <div class="eyebrow">Offline support</div>
+              <h2 class="section-title">Local app readiness</h2>
+              <div id="settingsOffline" class="offline-panel" aria-live="polite"></div>
+              <div class="settings-action-grid"><button class="secondary" id="settingsClearCache" type="button">Refresh
+                  Offline Cache</button><button class="secondary" id="settingsReload" type="button">Reload App</button>
+              </div>
+              <p class="field-help">StudyForge can cache its local app shell for offline use after it has loaded once.
+                Research, ChatGPT, and other external web services still require an internet connection.</p>
+            </div>
+          </div>
+          <details class="settings-inline-info">
+            <summary>Simple guide</summary>
+            <div class="guide-grid compact-guide">
+              <div class="card guide-card"><span class="guide-number">1</span>
+                <div>
+                  <h3>Notes</h3>
+                  <p>Put your reviewers, class notes, or study material here. Keep one topic organized in one place.</p>
+                </div>
+              </div>
+              <div class="card guide-card"><span class="guide-number">2</span>
+                <div>
+                  <h3>Research</h3>
+                  <p>Enter a topic, build the GPT prompt, open ChatGPT, then paste the useful notes back into
+                    StudyForge.</p>
+                </div>
+              </div>
+              <div class="card guide-card"><span class="guide-number">3</span>
+                <div>
+                  <h3>Tests</h3>
+                  <p>Choose your notes, set the test options, generate questions in ChatGPT, import the JSON, then save
+                    the test.</p>
+                </div>
+              </div>
+              <div class="card guide-card"><span class="guide-number">4</span>
+                <div>
+                  <h3>Flashcards</h3>
+                  <p>Generate or import flashcard JSON, edit the cards, choose how many to study, then reveal the answer
+                    when ready.</p>
+                </div>
+              </div>
+              <div class="card guide-card"><span class="guide-number">5</span>
+                <div>
+                  <h3>Active Recall</h3>
+                  <p>Read the prompt, answer it in your head, reveal the answer, then mark whether you remembered it.
+                  </p>
+                </div>
+              </div>
+              <div class="card guide-card"><span class="guide-number">6</span>
+                <div>
+                  <h3>Mistake Bank</h3>
+                  <p>After tests, review the questions you missed. Use this when you want to focus on weak areas instead
+                    of reviewing everything.</p>
+                </div>
+              </div>
+            </div>
+          </details>
+          <details class="settings-inline-info">
+            <summary>About StudyForge</summary>
+            <div class="about-grid compact-about">
+              <div class="card about-card">
+                <div class="about-mark">S</div>
+                <h2>University Study Workspace</h2>
+                <p>StudyForge keeps your notes, reviewers, tests, mistakes, flashcards, study plans, and progress in one
+                  browser-based workspace.</p>
+              </div>
+              <div class="card about-card">
+                <div class="eyebrow">Your data</div>
+                <h2>Local by design</h2>
+                <p>Your study data is saved in this browser. You do not need an account to use the core study tools.
+                  Export a backup before changing devices or clearing browser data.</p>
+              </div>
+              <div class="card about-card">
+                <div class="eyebrow">Best use</div>
+                <h2>Study, then practice</h2>
+                <p>Use your own notes as the source, build questions from the main ideas, take the test, and spend extra
+                  time on what you missed.</p>
+              </div>
+            </div>
+            <p class="small about-note-inline"><b>StudyForge</b> — a focused local-first study workspace with simple
+              controls and accessible reading.</p>
+          </details>
+        </section>
+
+
+        <section id="testView" class="view">
+          <div class="test-shell" id="testShell"></div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div class="modal" id="noteModal" aria-hidden="true">
+    <div class="modalbox">
+      <div class="modal-head">
+        <div>
+          <div class="eyebrow">Study notes</div>
+          <h2 id="noteModalTitle">Add notes</h2>
+          <p class="small" id="noteSaveStatus">Saved locally</p>
+        </div><button class="close" data-close="noteModal">×</button>
+      </div>
+      <form id="noteForm" class="form">
+        <div class="form-grid">
+          <div class="field"><label for="noteSubject">Subject</label><input id="noteSubject" required
+              placeholder="e.g. Hydraulics" /></div>
+          <div class="field"><label for="noteTopic">Topic</label><input id="noteTopic" required
+              placeholder="e.g. Stability of Floating Bodies" /></div>
+        </div>
+        <div class="field">
+          <label for="noteText">Notes / source material</label>
+          <textarea id="noteText" required
+            placeholder="Paste your lecture notes, textbook notes, reviewer, or study material here..."></textarea>
+          <div class="note-upload-box">
+            <div class="note-upload-head">
+              <div>
+                <strong>Upload study material</strong>
+                <span class="small">Extract text from a PDF or Microsoft Word (.docx) file.</span>
+              </div>
+              <label class="secondary note-upload-btn" for="noteFileInput">Upload PDF / Word</label>
+              <input id="noteFileInput" type="file"
+                accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                hidden />
+            </div>
+            <div id="noteFileStatus" class="note-upload-status" aria-live="polite">No file selected.</div>
+            <div class="field-help">The file is processed in your browser. StudyForge extracts the text and places it in
+              the notes box; the original file is not uploaded to a server.</div>
+          </div>
+        </div>
+        <button class="primary" type="submit" id="saveNoteBtn">Save Notes</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal" id="createNoteModal" aria-hidden="true">
+    <div class="modalbox modalbox-wide create-note-box">
+      <div class="modal-head">
+        <div>
+          <div class="eyebrow">GPT note builder</div>
+          <h2>Create a Note</h2>
+          <p class="small">Give ChatGPT the subject, topic, and any draft material. StudyForge will build a detailed
+            reviewer prompt and accept the returned JSON.</p>
+        </div><button class="close" data-close="createNoteModal">×</button>
+      </div>
+      <form id="createNoteForm" class="form">
+        <div class="form-grid">
+          <div class="field"><label for="createNoteSubject">Subject / Course <span
+                class="required-mark">Required</span></label><input id="createNoteSubject" required
+              placeholder="e.g. Hydrology, Korean, Structural Engineering" /></div>
+          <div class="field"><label for="createNoteTopic">Topic <span
+                class="required-mark">Required</span></label><input id="createNoteTopic" required
+              placeholder="e.g. Darcy's Law and groundwater flow" /></div>
+        </div>
+        <div class="form-grid">
+          <div class="field"><label for="createNoteLevel">Academic level</label><select id="createNoteLevel">
+              <option>College / Professional</option>
+              <option>Senior High School</option>
+              <option>High School</option>
+              <option>General Review</option>
+            </select></div>
+          <div class="field"><label for="createNoteReference">Reference book / author <span
+                class="small">optional</span></label><input id="createNoteReference"
+              placeholder="e.g. Hydrology and Floodplain Analysis — Bedient, Huber & Vieux" /></div>
+        </div>
+        <div class="field"><label for="createNoteDraft">Draft notes / guide <span class="small">optional but
+              recommended</span></label><textarea id="createNoteDraft" class="create-note-draft"
+            placeholder="Paste your class notes, outline, teacher coverage, formulas, rough ideas, or incomplete draft here. GPT should use this to understand what to focus on."></textarea>
+          <div class="field-help">The draft is a guide, not the final answer. GPT should organize it, explain missing
+            links, and avoid inventing unsupported facts.</div>
+        </div>
+        <div class="create-note-options">
+          <label class="focus-check"><input type="checkbox" name="createNoteFocus" value="core concepts"
+              checked><span>Core concepts</span></label>
+          <label class="focus-check"><input type="checkbox" name="createNoteFocus" value="definitions and terminology"
+              checked><span>Definitions</span></label>
+          <label class="focus-check"><input type="checkbox" name="createNoteFocus"
+              value="formulas and calculations"><span>Formulas / calculations</span></label>
+          <label class="focus-check"><input type="checkbox" name="createNoteFocus" value="worked examples"><span>Worked
+              examples</span></label>
+          <label class="focus-check"><input type="checkbox" name="createNoteFocus"
+              value="comparisons and relationships"><span>Comparisons</span></label>
+          <label class="focus-check"><input type="checkbox" name="createNoteFocus"
+              value="figures, diagrams, and visual explanations" checked><span>Figures / diagrams</span></label>
+          <label class="focus-check"><input type="checkbox" name="createNoteFocus"
+              value="common mistakes and exam traps" checked><span>Common mistakes</span></label>
+          <label class="focus-check"><input type="checkbox" name="createNoteFocus" value="exam-focused review points"
+              checked><span>Exam focus</span></label>
+        </div>
+        <div class="actions"><button class="primary" type="submit">Build GPT Note Prompt</button><button
+            class="secondary" type="button" id="clearCreateNote">Clear</button></div>
+      </form>
+      <div id="createNotePromptArea" hidden></div>
+      <div class="create-note-import">
+        <div class="workflow-guide-head">
+          <div>
+            <div class="eyebrow">Step 2</div>
+            <h3 class="section-title">Paste the GPT JSON back here</h3>
+            <p class="small">GPT should return only valid JSON. StudyForge will format it as a reviewer and save it
+              under the selected subject.</p>
+          </div>
+        </div>
+        <textarea id="createNoteJSON" class="gpt-json-input note-json-input"
+          placeholder='Paste GPT JSON here…'></textarea>
+        <div class="actions"><button class="secondary" type="button" id="copyCreateNotePrompt">Copy
+            Prompt</button><button class="secondary" type="button" id="copyOpenCreateNoteGPT">Copy & Open
+            ChatGPT</button><button class="primary" type="button" id="importCreatedNote">Import Note JSON</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="noteViewerModal" aria-hidden="true">
+    <div class="modalbox modalbox-wide note-viewer-box">
+      <div class="modal-head">
+        <div>
+          <div class="eyebrow" id="noteViewerEyebrow">Study reviewer</div>
+          <h2 id="noteViewerTitle">Note</h2>
+          <p class="small" id="noteViewerMeta"></p>
+        </div>
+        <div class="modal-head-actions"><button class="secondary" id="noteViewerPrint" type="button">Print
+            mode</button><button class="secondary" id="noteViewerPDF" type="button">Export PDF</button><button
+            class="secondary" id="noteViewerDOCX" type="button">Export DOCX</button><button class="close"
+            data-close="noteViewerModal">×</button></div>
+      </div>
+      <div id="noteViewerContent"></div>
+    </div>
+  </div>
+
+  <div class="modal" id="studyCardsModal" aria-hidden="true">
+    <div class="modalbox modalbox-wide study-cards-box">
+      <div class="modal-head">
+        <div>
+          <div class="eyebrow" id="studyCardsEyebrow">Active study</div>
+          <h2 id="studyCardsTitle">Flashcards</h2>
+          <p class="small" id="studyCardsMeta"></p>
+        </div>
+        <div class="modal-head-actions"><button class="secondary" id="editStudyCardsBtn" type="button">Edit
+            Cards</button><button class="close" data-close="studyCardsModal">×</button></div>
+      </div>
+      <div id="studyCardsContent"></div>
+    </div>
+  </div>
+
+  <div class="modal" id="testModal" aria-hidden="true">
+    <div class="modalbox modalbox-wide">
+      <div class="modal-head">
+        <div>
+          <div class="eyebrow">Test builder</div>
+          <h2>Create a Test</h2>
+          <p class="small">Build the prompt here, generate the exam in ChatGPT, import the JSON, then review and save.
+          </p>
+        </div><button class="close" data-close="testModal">×</button>
+      </div>
+      <form id="testForm" class="form">
+        <div class="form-grid">
+          <div class="field"><label for="testTitle">Test title</label><input id="testTitle" required
+              placeholder="e.g. Midterm — Fluid Mechanics" /></div>
+          <div class="field"><label for="testSubject">Subject</label><input id="testSubject" required
+              placeholder="e.g. Fluid Mechanics" /></div>
+        </div>
+        <div class="form-grid">
+          <div class="field"><label for="testSourceNote">Study notes</label><select id="testSourceNote">
+              <option value="">No source — add questions manually</option>
+            </select></div>
+          <div class="field"><label for="testDifficulty">Assessment level</label><select id="testDifficulty">
+              <option value="easy">Easy</option>
+              <option value="moderate" selected>Moderate</option>
+              <option value="hard">Hard</option>
+              <option value="master">Master</option>
+            </select></div>
+        </div>
+        <div class="form-grid">
+          <div class="field"><label for="testType">Test type</label><select id="testType">
+              <option value="mcq">Multiple Choice</option>
+              <option value="truefalse">True or False</option>
+              <option value="identification">Identification</option>
+              <option value="flashcards">Flashcards</option>
+              <option value="mixed" selected>Mixed</option>
+            </select></div>
+          <div class="field"><label for="testMode">Test mode</label><select id="testMode">
+              <option value="exam">Exam — feedback at the end</option>
+              <option value="practice">Practice — feedback after each answer</option>
+              <option value="review">Review — only previous mistakes</option>
+              <option value="adaptive">Adaptive — weak questions first</option>
+            </select><small class="field-help">Test mode changes how the test behaves when you take it. It does not
+              change the GPT question content.</small></div>
+          <div class="field"><label for="testDuration">Time limit</label><select id="testDuration">
+              <option value="0">No time limit</option>
+              <option value="300">5 minutes</option>
+              <option value="600">10 minutes</option>
+              <option value="900">15 minutes</option>
+              <option value="1800">30 minutes</option>
+              <option value="2700">45 minutes</option>
+              <option value="3600">60 minutes</option>
+              <option value="5400">90 minutes</option>
+              <option value="7200">120 minutes</option>
+            </select></div>
+        </div>
+        <div class="field instructor-focus-field"><label>Instructor focus / coverage <span
+              class="required-mark">Required</span></label>
+          <div class="focus-check-grid" role="group" aria-label="Instructor focus and coverage">
+            <label class="focus-check"><input type="checkbox" name="instructorFocus"
+                value="Concepts"><span>Concepts</span></label>
+            <label class="focus-check"><input type="checkbox" name="instructorFocus"
+                value="Calculations"><span>Calculations</span></label>
+            <label class="focus-check"><input type="checkbox" name="instructorFocus"
+                value="Applications"><span>Applications</span></label>
+            <label class="focus-check"><input type="checkbox" name="instructorFocus"
+                value="Definitions"><span>Definitions</span></label>
+            <label class="focus-check"><input type="checkbox" name="instructorFocus"
+                value="Scenarios"><span>Scenarios</span></label>
+            <label class="focus-check"><input type="checkbox" name="instructorFocus"
+                value="Comparisons"><span>Comparisons</span></label>
+            <label class="focus-check"><input type="checkbox" name="instructorFocus"
+                value="Analysis"><span>Analysis</span></label>
+          </div><input type="hidden" id="testInstructions" value=""><small class="field-help">Choose at least one. You
+            can select several areas to guide the questions.</small>
+        </div>
+        <div class="card blueprint-card">
+          <div class="topline" style="margin-bottom:10px">
+            <div>
+              <div class="eyebrow">Question settings</div><b>Fine-tune after GPT import</b>
+            </div>
+          </div>
+          <div class="small">Each question can still have its own difficulty, cognitive level, answer, explanation, and
+            source. Your test-level settings guide the GPT prompt.</div>
+        </div>
+        <div class="card blueprint-editor-card">
+          <div class="topline" style="margin-bottom:10px">
+            <div>
+              <div class="eyebrow">Exam blueprint</div>
+              <h3 class="section-title">Cognitive level distribution</h3>
+              <p class="small">Set the percentage of questions for each level. The total must equal 100%.</p>
+            </div><span class="badge" id="blueprintTotal">100%</span>
+          </div>
+          <div class="blueprint-grid">
+            <label class="blueprint-item"><span>Remember</span><input id="blueprintRemember" type="number" min="0"
+                max="100" step="5" value="20"><b>%</b></label>
+            <label class="blueprint-item"><span>Understand</span><input id="blueprintUnderstand" type="number" min="0"
+                max="100" step="5" value="30"><b>%</b></label>
+            <label class="blueprint-item"><span>Apply</span><input id="blueprintApply" type="number" min="0" max="100"
+                step="5" value="30"><b>%</b></label>
+            <label class="blueprint-item"><span>Analyze</span><input id="blueprintAnalyze" type="number" min="0"
+                max="100" step="5" value="15"><b>%</b></label>
+            <label class="blueprint-item"><span>Evaluate</span><input id="blueprintEvaluate" type="number" min="0"
+                max="100" step="5" value="5"><b>%</b></label>
+          </div>
+          <div id="blueprintPreview" class="blueprint-preview"></div>
+        </div>
+        <div class="workflow-card test-builder-workflow">
+          <div class="workflow-guide-head">
+            <div>
+              <div class="eyebrow">Simple steps</div>
+              <h3 class="section-title">GPT Exam → Import → Save</h3>
+              <p class="small">You can complete the whole GPT workflow here without closing the test builder.</p>
+            </div>
+          </div>
+          <div class="step-strip test-step-strip">
+            <div class="step-item"><span>1</span><b>Test details</b><small>Title and subject.</small></div>
+            <div class="step-item"><span>2</span><b>Study notes</b><small>Choose the notes GPT should use.</small></div>
+            <div class="step-item"><span>3</span><b>Test settings</b><small>Level, type, mode, and time.</small></div>
+            <div class="step-item"><span>4</span><b>Number of questions</b><small>Choose how many GPT should
+                create.</small></div>
+            <div class="step-item"><span>5</span><b>Generate prompt</b><small>Build the exam prompt.</small></div>
+            <div class="step-item"><span>6</span><b>Copy & open GPT</b><small>Paste the prompt in ChatGPT.</small></div>
+            <div class="step-item"><span>7</span><b>Paste JSON & import</b><small>Bring the JSON back here, then review
+                and save.</small></div>
+          </div>
+          <div class="gpt-workflow-controls">
+            <div class="field"><label for="gptQuestionCount">Number of questions</label><input id="gptQuestionCount"
+                type="number" min="1" max="100" step="1" value="20" /></div>
+            <div class="actions gpt-workflow-actions"><button class="primary" type="button" id="openGPTPrompt">Generate
+                Exam Prompt</button><button class="secondary" type="button" id="copyGPTPromptInline" disabled>Copy
+                Prompt</button><button class="secondary" type="button" id="openGPTChatFromBuilder">Copy & Open
+                ChatGPT</button></div>
+          </div>
+          <div class="field gpt-inline-field"><label for="gptPromptInline">Your GPT exam prompt</label><textarea
+              id="gptPromptInline" class="generated-prompt" readonly
+              placeholder="Click “Generate Exam Prompt” after choosing your test settings."></textarea></div>
+          <div class="gpt-return-grid">
+            <div class="field"><label for="gptImportInline">Paste GPT JSON here</label><textarea id="gptImportInline"
+                class="gpt-json-input" placeholder='Paste the JSON response from ChatGPT here…'></textarea></div>
+            <div class="gpt-return-help">
+              <div class="eyebrow">Almost done</div>
+              <h4>Paste → Import → Review</h4>
+              <p>Copy the JSON response from ChatGPT and paste it in the box. StudyForge will validate it, place the
+                questions below, and keep you in the same test builder.</p><button class="primary" type="button"
+                id="importGPTQuestionsInline">Import GPT JSON</button>
+            </div>
+          </div>
+        </div>
+        <div class="builder-actions"><button class="secondary" type="button" id="openGPTImport">Open JSON
+            Import</button><button class="secondary" type="button" id="addQuestion">+ Add Question</button><button
+            class="secondary" type="button" id="checkTestQualityBtn">Check Question Quality</button></div>
+        <div class="small workflow-note">Simple flow: <b>details → prompt → GPT → paste JSON → import → review → Save
+            Test.</b></div>
+        <div id="generatorStatus" class="small" role="status"></div>
+        <div id="questionBuilder" class="question-builder"></div>
+        <div id="testQualityPanel" class="card test-quality-panel" hidden></div>
+        <div class="test-save-row"><span id="questionCount" class="small">0 questions</span><button class="primary"
+            type="submit">Save Test</button></div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal" id="gptImportModal" aria-hidden="true">
+    <div class="modalbox modalbox-wide">
+      <div class="modal-head">
+        <div>
+          <div class="eyebrow">GPT → StudyForge</div>
+          <h2>Import Exam Questions</h2>
+          <p class="small">Paste the JSON returned by GPT. StudyForge validates the structure and places the questions
+            directly into the builder.</p>
+        </div><button class="close" data-close="gptImportModal">×</button>
+      </div>
+      <div class="field"><label for="gptImportText">GPT JSON</label><textarea id="gptImportText"
+          style="min-height:360px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace"
+          placeholder='{"questions":[{"type":"mcq","question":"...","choices":["...","...","...","..."],"answer":"...","explanation":"...","difficulty":"hard","level":"Analyze","source":"..."}]}'></textarea>
+      </div>
+      <div class="actions"><button class="secondary" type="button" data-close="gptImportModal">Cancel</button><button
+          class="primary" type="button" id="importGPTQuestionsBtn">Import Questions</button></div>
+    </div>
+  </div>
+
+  <div class="modal" id="reviewerExportModal" aria-hidden="true">
+    <div class="modalbox">
+      <div class="modal-head">
+        <div>
+          <div class="eyebrow">Reviewer output</div>
+          <h2 id="reviewerExportTitle">Export reviewer</h2>
+          <p class="small">Choose a format. The export is generated locally in your browser.</p>
+        </div><button class="close" data-close="reviewerExportModal">×</button>
+      </div>
+      <div class="print-choice-grid">
+        <button class="print-choice" id="exportReviewerPDF" type="button"><b>PDF reviewer</b><span>Formatted pages for
+            printing, saving, or sharing.</span></button>
+        <button class="print-choice" id="exportReviewerDOCX" type="button"><b>Word / DOCX reviewer</b><span>Editable
+            Microsoft Word document with headings, bullets, tables, and formulas.</span></button>
+        <button class="print-choice" id="printReviewerChoice" type="button"><b>Print mode</b><span>Open a clean paper
+            layout or use your browser's Save as PDF.</span></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="shareTestModal" aria-hidden="true">
+    <div class="modalbox modalbox-wide">
+      <div class="modal-head">
+        <div>
+          <div class="eyebrow">Share a test</div>
+          <h2 id="shareTestTitle">Share Test</h2>
+          <p class="small">Send a clean copy of this test. Attempts and personal history are never included.</p>
+        </div><button class="close" data-close="shareTestModal">×</button>
+      </div>
+      <div id="shareTestSummary" class="share-summary"></div>
+      <div class="share-options-grid">
+        <button class="share-option" id="downloadSharedTest" type="button"><b>Download test file</b><span>Creates a
+            .studyforge-test.json file that another StudyForge user can import.</span></button>
+        <button class="share-option" id="copySharedTestJSON" type="button"><b>Copy share data</b><span>Copies the
+            portable JSON to your clipboard.</span></button>
+        <button class="share-option" id="nativeShareTest" type="button"><b>Share from this device</b><span>Uses your
+            browser or phone's sharing sheet when supported.</span></button>
+        <button class="share-option" id="sharePrintTest" type="button"><b>Print / PDF</b><span>Open the print-ready
+            student copy or answer-key layout.</span></button>
+      </div>
+      <div class="share-help">The shared file contains the test itself: questions, choices, answers, explanations,
+        difficulty, cognitive levels, sources, figures, and blueprint. It does not include your test attempts or
+        history.</div>
+    </div>
+  </div>
+
+  <div class="modal" id="printModeModal" aria-hidden="true">
+    <div class="modalbox">
+      <div class="modal-head">
+        <div>
+          <div class="eyebrow">Print mode</div>
+          <h2>Choose what to print</h2>
+          <p class="small">Use a clean layout designed for paper or Save as PDF.</p>
+        </div><button class="close" data-close="printModeModal">×</button>
+      </div>
+      <div class="print-choice-grid">
+        <button class="print-choice" id="printTestStudent" type="button"><b>Student copy</b><span>Questions and choices
+            only.</span></button>
+        <button class="print-choice" id="printTestAnswerKey" type="button"><b>Answer key</b><span>Questions, choices,
+            and correct answers.</span></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="gptPromptModal" aria-hidden="true">
+    <div class="modalbox modalbox-wide">
+      <div class="modal-head">
+        <div>
+          <div class="eyebrow">GPT prompt</div>
+          <h2>Exam Construction Prompt</h2>
+          <p class="small">Copy this prompt into GPT. GPT should analyze the notes conceptually, construct difficult
+            questions, and return JSON for StudyForge.</p>
+        </div><button class="close" data-close="gptPromptModal">×</button>
+      </div>
+      <div class="field"><label for="gptPromptText">Generated prompt</label><textarea id="gptPromptText"
+          class="generated-prompt modal-prompt" readonly></textarea></div>
+      <div class="actions"><button class="secondary" type="button" data-close="gptPromptModal">Close</button><button
+          class="secondary" type="button" id="openChatFromPrompt">Open ChatGPT</button><button class="primary"
+          type="button" id="copyGPTPrompt">Copy Prompt</button></div>
+    </div>
+  </div>
+
+  <div id="liveRegion" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+  <script type="module" src="script.js"></script>
+  <div class="modal" id="quickReviewModal" aria-hidden="true">
+    <div class="modalbox">
+      <div class="modal-head">
+        <div>
+          <div class="eyebrow">Targeted practice</div>
+          <h2>Quick Review</h2>
+          <p class="small">Choose how many missed or weak questions to practice.</p>
+        </div><button class="close" data-close="quickReviewModal">×</button>
+      </div>
+      <div class="field"><label for="quickReviewCount">Questions</label><select id="quickReviewCount">
+          <option value="5">5 questions</option>
+          <option value="10" selected>10 questions</option>
+          <option value="15">15 questions</option>
+          <option value="20">20 questions</option>
+        </select></div>
+      <div class="actions"><button class="secondary" data-close="quickReviewModal">Cancel</button><button
+          class="primary" id="startQuickReview">Start Review</button></div>
+    </div>
+  </div>
+</body>
+
+</html>

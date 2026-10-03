@@ -1,0 +1,9 @@
+{
+  "name":"StudyForge",
+  "short_name":"StudyForge",
+  "start_url":"./",
+  "display":"standalone",
+  "background_color":"#f6f7f5",
+  "theme_color":"#496b59",
+  "description":"Local-first university study and assessment workspace"
+}
